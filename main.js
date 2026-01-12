@@ -32,9 +32,19 @@ function setStore(data) {
 let mainWindow;
 
 function createWindow() {
+  const isMac = process.platform === "darwin";
+  const isWindows = process.platform === "win32";
+
   mainWindow = new BrowserWindow({
     width: 1400,
     height: 900,
+    transparent: true,
+    vibrancy: isMac ? "fullscreen-ui" : undefined,
+    visualEffectState: isMac ? "active" : undefined,
+    backgroundColor: "#00000000",
+    backgroundMaterial: isWindows ? "acrylic" : undefined,
+    titleBarStyle: isMac ? "hiddenInset" : "default",
+    trafficLightPosition: isMac ? { x: 16, y: 16 } : undefined,
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
