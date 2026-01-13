@@ -2,6 +2,7 @@ import React, { useState, KeyboardEvent, ChangeEvent } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import type { FileItem } from "../../types";
+import { useEditorStore } from "../stores";
 import "./EditorPanel.css";
 
 interface EditorPanelProps {
@@ -18,6 +19,7 @@ function EditorPanel({
   onBack,
 }: EditorPanelProps): React.ReactElement {
   const [activeTab, setActiveTab] = useState<"edit" | "preview">("edit");
+  const hasUnsavedChanges = useEditorStore((s) => s.hasUnsavedChanges);
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>): void => {
     if (e.key === "Tab") {
@@ -55,45 +57,60 @@ function EditorPanel({
 
   return (
     <div className="editor-panel">
-      <div className="editor-header">
+      {/* Floating toolbar */}
+      <div className="editor-floating-toolbar">
+        {/* Left: Back button */}
         {onBack && (
-          <button className="editor-back-btn" onClick={onBack}>
-            ← Back
+          <button className="floating-btn back-btn" onClick={onBack} title="Back to documents">
+            ‹
           </button>
         )}
-        <span className="editor-title">📄 {selectedFile.name}</span>
-        <div className="editor-tabs">
+        
+        {/* Center: Filename pill */}
+        <div className="floating-filename">
+          <span className="filename-text">{selectedFile.name.replace(/\.mdx?$/, "")}</span>
+          {hasUnsavedChanges && <span className="unsaved-dot">●</span>}
+        </div>
+        
+        {/* Right: Edit/Preview toggle */}
+        <div className="floating-tabs">
           <button
-            className={`editor-tab ${activeTab === "edit" ? "active" : ""}`}
+            className={`floating-tab ${activeTab === "edit" ? "active" : ""}`}
             onClick={() => setActiveTab("edit")}
+            title="Edit mode"
           >
             Edit
           </button>
           <button
-            className={`editor-tab ${activeTab === "preview" ? "active" : ""}`}
+            className={`floating-tab ${activeTab === "preview" ? "active" : ""}`}
             onClick={() => setActiveTab("preview")}
+            title="Preview mode"
           >
             Preview
           </button>
         </div>
       </div>
-      <div className="editor-content">
-        {activeTab === "edit" ? (
-          <textarea
-            className="markdown-textarea"
-            value={content}
-            onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
-              onContentChange(e.target.value)
-            }
-            onKeyDown={handleKeyDown}
-            placeholder="Write your markdown content here..."
-            spellCheck={false}
-          />
-        ) : (
-          <div className="markdown-preview">
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
-          </div>
-        )}
+
+      {/* Content area with rounded corners */}
+      <div className="editor-content-wrapper">
+        <div className="editor-content">
+          {activeTab === "edit" ? (
+            <textarea
+              className="markdown-textarea"
+              value={content}
+              onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
+                onContentChange(e.target.value)
+              }
+              onKeyDown={handleKeyDown}
+              placeholder="Start writing..."
+              spellCheck={false}
+            />
+          ) : (
+            <div className="markdown-preview">
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

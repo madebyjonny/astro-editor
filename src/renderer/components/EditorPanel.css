@@ -4,82 +4,141 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background: rgba(0, 0, 0, 0.15);
+  background: transparent;
+  position: relative;
+  padding: 12px 16px 16px;
 }
 
-.editor-header {
-  padding: 12px 16px;
-  background: rgba(0, 0, 0, 0.1);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+/* Floating Toolbar */
+.editor-floating-toolbar {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  gap: 12px;
+  justify-content: space-between;
+  padding: 8px;
+  margin-bottom: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.editor-back-btn {
-  background: none;
+.floating-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
   border: none;
-  color: #888;
-  font-size: 13px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  color: #b0b0b0;
+  font-size: 20px;
   cursor: pointer;
-  padding: 6px 12px;
-  border-radius: 4px;
   transition: all 0.15s;
 }
 
-.editor-back-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
+.floating-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+}
+
+.floating-btn.back-btn {
+  font-size: 24px;
+  font-weight: 300;
+}
+
+/* Filename pill in center */
+.floating-filename {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  flex: 1;
+  max-width: 300px;
+  margin: 0 12px;
+  justify-content: center;
+}
+
+.filename-text {
+  font-size: 13px;
+  font-weight: 500;
+  color: #d4d4d4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.unsaved-dot {
+  color: #4ade80;
+  font-size: 10px;
+}
+
+/* Floating Tabs (Edit/Preview toggle) */
+.floating-tabs {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+}
+
+.floating-tab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 14px;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  color: #888;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.floating-tab:hover {
   color: #d4d4d4;
 }
 
-.editor-title {
-  font-size: 14px;
-  font-weight: 500;
-  flex: 1;
+.floating-tab.active {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
 }
 
+/* Content Wrapper with rounded corners */
+.editor-content-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: #1a1a1a;
+  border-radius: 16px 16px 0 0;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: none;
+}
+
+/* Content Area */
 .editor-content {
   flex: 1;
   overflow: auto;
   padding: 0;
   display: flex;
   flex-direction: column;
-}
-
-.editor-tabs {
-  display: flex;
-  gap: 4px;
-}
-
-.editor-tab {
-  padding: 6px 16px;
-  border: none;
-  background: transparent;
-  color: #888;
-  font-size: 13px;
-  cursor: pointer;
-  border-radius: 4px;
-  transition: all 0.15s;
-}
-
-.editor-tab:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: #d4d4d4;
-}
-
-.editor-tab.active {
-  background: rgba(14, 99, 156, 0.8);
-  color: white;
+  background: #1a1a1a;
 }
 
 /* Markdown Editor */
 .markdown-textarea {
   flex: 1;
   width: 100%;
-  padding: 16px;
+  padding: 24px;
   border: none;
-  background: #1e1e1e;
+  background: transparent;
   color: #d4d4d4;
   font-family: "SF Mono", "Fira Code", "Consolas", monospace;
   font-size: 14px;

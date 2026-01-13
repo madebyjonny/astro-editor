@@ -1,19 +1,12 @@
 import React from "react";
 import {
   useProjectStore,
-  useEditorStore,
   useDevServerStore,
-  useUIStore,
 } from "../stores";
 import "./Toolbar.css";
 
 function Toolbar(): React.ReactElement {
   const projectPath = useProjectStore((s) => s.projectPath);
-  const selectedCollection = useProjectStore((s) => s.selectedCollection);
-
-  const selectedFile = useEditorStore((s) => s.selectedFile);
-  const hasUnsavedChanges = useEditorStore((s) => s.hasUnsavedChanges);
-  const save = useEditorStore((s) => s.save);
 
   const {
     isRunning,
@@ -25,8 +18,6 @@ function Toolbar(): React.ReactElement {
     openPreview,
     clearError,
   } = useDevServerStore();
-
-  const openNewFileModal = useUIStore((s) => s.openNewFileModal);
 
   const handleStartDevServer = async (): Promise<void> => {
     if (projectPath) {
@@ -43,41 +34,33 @@ function Toolbar(): React.ReactElement {
   return (
     <>
       <div className="toolbar">
-        <h1>📝 Astro Content Editor</h1>
-        {selectedFile && (
-          <button className="btn btn-success" onClick={save}>
-            Save{" "}
-            {hasUnsavedChanges && <span className="unsaved-indicator">●</span>}
-          </button>
-        )}
-        {selectedCollection && (
-          <button className="btn btn-secondary" onClick={openNewFileModal}>
-            + New File
-          </button>
-        )}
-
-        {/* Dev Server Controls */}
-        {projectPath && <div className="toolbar-divider" />}
-        {projectPath && !isRunning && !isStarting && (
-          <button className="btn btn-run" onClick={handleStartDevServer}>
-            ▶ Run Dev Server
-          </button>
-        )}
-        {projectPath && isStarting && (
-          <button className="btn btn-run" disabled>
-            ⏳ Starting...
-          </button>
-        )}
-        {projectPath && isRunning && (
-          <>
-            <button className="btn btn-stop" onClick={handleStopDevServer}>
-              ⏹ Stop
+        <div className="toolbar-left">
+          <span className="toolbar-title">Astro Editor</span>
+        </div>
+        
+        <div className="toolbar-right">
+          {/* Dev Server Controls - minimal style */}
+          {projectPath && !isRunning && !isStarting && (
+            <button className="toolbar-icon-btn" onClick={handleStartDevServer} title="Start dev server">
+              ▶
             </button>
-            <button className="btn btn-preview" onClick={openPreview}>
-              🌐 Preview :{port}
+          )}
+          {projectPath && isStarting && (
+            <button className="toolbar-icon-btn" disabled title="Starting...">
+              ⏳
             </button>
-          </>
-        )}
+          )}
+          {projectPath && isRunning && (
+            <>
+              <button className="toolbar-icon-btn running" onClick={handleStopDevServer} title="Stop dev server">
+                ⏹
+              </button>
+              <button className="toolbar-icon-btn preview" onClick={openPreview} title={`Preview on port ${port}`}>
+                ↗
+              </button>
+            </>
+          )}
+        </div>
       </div>
 
       {/* Error Banner */}

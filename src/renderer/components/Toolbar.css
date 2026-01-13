@@ -2,64 +2,79 @@
 .toolbar {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
+  justify-content: space-between;
+  padding: 10px 16px;
   padding-left: 80px; /* Space for traffic lights on macOS */
-  background: rgba(0, 0, 0, 0.15);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: transparent;
   -webkit-app-region: drag;
+  min-height: 44px;
 }
 
 .toolbar > * {
   -webkit-app-region: no-drag;
 }
 
-.toolbar h1 {
-  font-size: 16px;
-  font-weight: 600;
-  color: #e0e0e0;
+.toolbar-left {
+  display: flex;
+  align-items: center;
   -webkit-app-region: drag;
 }
 
-.toolbar-divider {
-  width: 1px;
-  height: 24px;
-  background: rgba(255, 255, 255, 0.15);
-  margin: 0 8px;
+.toolbar-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: #888;
+  letter-spacing: 0.02em;
 }
 
-/* Dev Server Buttons */
-.btn-run {
-  background: rgba(46, 160, 67, 0.85);
-  color: white;
+.toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
-.btn-run:hover {
-  background: rgba(63, 185, 80, 0.9);
+/* Minimal Icon Buttons */
+.toolbar-icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 6px;
+  color: #888;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s;
 }
 
-.btn-run:disabled {
-  background: rgba(72, 79, 88, 0.6);
-  color: #8b949e;
+.toolbar-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #d4d4d4;
+}
+
+.toolbar-icon-btn:disabled {
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
-.btn-stop {
-  background: rgba(218, 54, 51, 0.85);
-  color: white;
+.toolbar-icon-btn.running {
+  color: #f87171;
 }
 
-.btn-stop:hover {
-  background: rgba(248, 81, 73, 0.9);
+.toolbar-icon-btn.running:hover {
+  background: rgba(248, 113, 113, 0.15);
+  color: #f87171;
 }
 
-.btn-preview {
-  background: rgba(137, 87, 229, 0.85);
-  color: white;
+.toolbar-icon-btn.preview {
+  color: #a78bfa;
 }
 
-.btn-preview:hover {
-  background: rgba(163, 113, 247, 0.9);
+.toolbar-icon-btn.preview:hover {
+  background: rgba(167, 139, 250, 0.15);
+  color: #a78bfa;
 }
 
 /* Error Banner */
@@ -67,18 +82,18 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 16px;
-  background: rgba(92, 45, 45, 0.85);
-  border-bottom: 1px solid rgba(218, 54, 51, 0.5);
+  padding: 8px 16px;
+  background: rgba(92, 45, 45, 0.7);
+  border-bottom: 1px solid rgba(218, 54, 51, 0.3);
   color: #f8d7da;
-  font-size: 13px;
+  font-size: 12px;
 }
 
 .error-banner button {
   background: none;
   border: none;
   color: #f8d7da;
-  font-size: 18px;
+  font-size: 16px;
   cursor: pointer;
   padding: 0 8px;
   opacity: 0.7;
