@@ -1,0 +1,218 @@
+/* Documents Grid Styles */
+.documents-grid-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.1);
+  padding: 24px;
+}
+
+.documents-header {
+  margin-bottom: 20px;
+}
+
+.documents-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: #e0e0e0;
+  margin: 0;
+}
+
+/* Collection Pills */
+.collection-pills {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.collection-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  color: #888;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.collection-pill:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #d4d4d4;
+}
+
+.collection-pill.active {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+.pill-indicator {
+  font-size: 10px;
+  opacity: 0.6;
+}
+
+/* Documents Grid */
+.documents-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 24px;
+  overflow-y: auto;
+  flex: 1;
+  padding-bottom: 24px;
+  align-content: start;
+}
+
+.no-files-message {
+  grid-column: 1 / -1;
+  padding: 40px;
+  text-align: center;
+  color: #666;
+  font-size: 14px;
+}
+
+.select-collection-hint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  color: #666;
+  font-size: 14px;
+}
+
+.select-collection-hint p {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 16px 24px;
+  border-radius: 8px;
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+}
+
+/* Empty State */
+.documents-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #888;
+  text-align: center;
+}
+
+.documents-empty-state .empty-state-icon {
+  font-size: 64px;
+  margin-bottom: 24px;
+  opacity: 0.5;
+}
+
+.documents-empty-state h2 {
+  font-size: 24px;
+  font-weight: 500;
+  margin-bottom: 12px;
+  color: #b0b0b0;
+}
+
+.documents-empty-state p {
+  font-size: 14px;
+  max-width: 400px;
+  line-height: 1.6;
+}
+
+/* Documents Content (scrollable area) */
+.documents-content {
+  flex: 1;
+  overflow-y: auto;
+  padding-bottom: 24px;
+  padding-right: 16px;
+  margin-right: -8px;
+}
+
+/* Collection Sections (All view) */
+.collection-section {
+  margin-bottom: 32px;
+  padding-bottom: 32px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.collection-section:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.collection-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding-right: 8px;
+}
+
+.collection-section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #d0d0d0;
+  margin: 0;
+}
+
+.section-indicator {
+  font-size: 10px;
+  opacity: 0.6;
+}
+
+.section-add-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #888;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.section-add-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+/* New Document Card */
+.document-card.new-document {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 2px dashed rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+  min-height: 200px;
+}
+
+.document-card.new-document:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.new-document-icon {
+  font-size: 32px;
+  color: #666;
+}
+
+.new-document-text {
+  font-size: 13px;
+  color: #666;
+}

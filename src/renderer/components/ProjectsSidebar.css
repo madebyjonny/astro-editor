@@ -1,0 +1,107 @@
+/* Projects Sidebar Styles */
+.projects-sidebar {
+  width: 200px;
+  background: rgba(0, 0, 0, 0.25);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.projects-sidebar-header {
+  padding: 16px;
+  padding-top: 8px;
+}
+
+.projects-sidebar-title {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+  letter-spacing: 0.5px;
+}
+
+.projects-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 8px;
+}
+
+.project-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  color: #d4d4d4;
+  transition: background 0.15s;
+  position: relative;
+}
+
+.project-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.project-item.active {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+
+.project-icon {
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.project-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.project-remove {
+  background: none;
+  border: none;
+  color: #666;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 2px 6px;
+  line-height: 1;
+  border-radius: 4px;
+  opacity: 0;
+  transition: all 0.15s;
+}
+
+.project-item:hover .project-remove {
+  opacity: 1;
+}
+
+.project-remove:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #f14c4c;
+}
+
+.projects-sidebar-footer {
+  padding: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.new-workspace-btn {
+  width: 100%;
+  padding: 8px 12px;
+  background: none;
+  border: none;
+  border-radius: 6px;
+  color: #888;
+  font-size: 13px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s;
+}
+
+.new-workspace-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #d4d4d4;
+}

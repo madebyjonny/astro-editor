@@ -52,6 +52,14 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
         set({ collections: collectionsResult as Collection[] });
       }
 
+      // Load all files by default (for "All" view)
+      const allFilesResult = await window.electronAPI.getAllFiles(
+        result.contentPath
+      );
+      if (!("error" in allFilesResult)) {
+        set({ files: allFilesResult as FileItem[] });
+      }
+
       // Refresh recent projects
       const projects = await window.electronAPI.getRecentProjects();
       set({ recentProjects: projects });
@@ -66,13 +74,42 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
   },
 
   openRecentProject: async (path) => {
+    const { projectPath } = get();
+
+    // If clicking on the already-open project, just reset to collections view
+    if (projectPath === path) {
+      set({ selectedCollection: null });
+      const { contentPath } = get();
+      if (contentPath) {
+        const allFilesResult = await window.electronAPI.getAllFiles(
+          contentPath
+        );
+        if (!("error" in allFilesResult)) {
+          set({ files: allFilesResult as FileItem[] });
+        }
+      }
+      return;
+    }
+
     const result = await window.electronAPI.openProjectByPath(path);
     await get().loadProject(result);
   },
 
   removeRecentProject: async (path) => {
+    const { projectPath } = get();
     const projects = await window.electronAPI.removeRecentProject(path);
     set({ recentProjects: projects });
+
+    // If the removed project is the current one, clear the project state
+    if (projectPath === path) {
+      set({
+        projectPath: null,
+        contentPath: null,
+        collections: [],
+        selectedCollection: null,
+        files: [],
+      });
+    }
   },
 
   closeProject: async () => {
@@ -86,8 +123,21 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
   },
 
   selectCollection: async (collection) => {
+    const { contentPath } = get();
+
     if (!collection) {
-      set({ selectedCollection: null, files: [] });
+      set({ selectedCollection: null });
+      // Load all files when "All" is selected
+      if (contentPath) {
+        const allFilesResult = await window.electronAPI.getAllFiles(
+          contentPath
+        );
+        if (!("error" in allFilesResult)) {
+          set({ files: allFilesResult as FileItem[] });
+        }
+      } else {
+        set({ files: [] });
+      }
       return;
     }
 

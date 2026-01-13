@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import Toolbar from "./components/Toolbar";
-import Sidebar from "./components/Sidebar";
+import ProjectsSidebar from "./components/ProjectsSidebar";
+import DocumentsGrid from "./components/DocumentsGrid";
 import EditorPanel from "./components/EditorPanel";
 import MetadataPanel from "./components/MetadataPanel";
 import NewFileModal from "./components/NewFileModal";
@@ -21,6 +22,7 @@ function App(): React.ReactElement {
   const recentProjects = useProjectStore((s) => s.recentProjects);
   const selectCollection = useProjectStore((s) => s.selectCollection);
   const closeProject = useProjectStore((s) => s.closeProject);
+  const openProject = useProjectStore((s) => s.openProject);
   const openRecentProject = useProjectStore((s) => s.openRecentProject);
   const removeRecentProject = useProjectStore((s) => s.removeRecentProject);
   const refreshRecentProjects = useProjectStore((s) => s.refreshRecentProjects);
@@ -47,7 +49,13 @@ function App(): React.ReactElement {
 
   // UI store
   const showNewFileModal = useUIStore((s) => s.showNewFileModal);
+  const openNewFileModal = useUIStore((s) => s.openNewFileModal);
   const closeNewFileModal = useUIStore((s) => s.closeNewFileModal);
+
+  // Get project name from path
+  const projectName = projectPath
+    ? projectPath.split("/").pop() || "Project"
+    : "";
 
   // Load recent projects on mount
   useEffect(() => {
@@ -95,13 +103,46 @@ function App(): React.ReactElement {
     }
   };
 
+  // Handle going back from editor to documents grid
+  const handleBackToDocuments = (): void => {
+    if (!confirmUnsavedChanges()) return;
+    resetEditor();
+  };
+
+  // Handle clicking on a project in sidebar
+  const handleOpenRecentProject = async (path: string): Promise<void> => {
+    if (!confirmUnsavedChanges()) return;
+    resetEditor();
+    await openRecentProject(path);
+  };
+
   // Handle recent project removal
   const handleRemoveRecentProject = async (
     path: string,
     e: React.MouseEvent
   ): Promise<void> => {
     e.stopPropagation();
+
+    // If removing the current project, check for unsaved changes first
+    if (projectPath === path && !confirmUnsavedChanges()) return;
+
     await removeRecentProject(path);
+
+    // Reset editor if we removed the current project
+    if (projectPath === path) {
+      resetEditor();
+    }
+  };
+
+  // Handle opening new document modal for a specific collection
+  const handleNewDocument = async (
+    collection: typeof selectedCollection
+  ): Promise<void> => {
+    if (!collection || !contentPath) return;
+
+    // Select the collection first to load the schema
+    await handleSelectCollection(collection);
+    openNewFileModal();
   };
 
   // Handle file creation
@@ -135,32 +176,46 @@ function App(): React.ReactElement {
       <Toolbar />
 
       <div className="main-content">
-        <Sidebar
-          projectPath={projectPath}
-          collections={collections}
-          selectedCollection={selectedCollection}
-          onSelectCollection={handleSelectCollection}
-          files={files}
-          selectedFile={selectedFile}
-          onSelectFile={handleSelectFile}
+        {/* Left: Projects/Workspaces sidebar */}
+        <ProjectsSidebar
           recentProjects={recentProjects}
-          onOpenRecentProject={openRecentProject}
+          currentProjectPath={projectPath}
+          onOpenRecentProject={handleOpenRecentProject}
           onRemoveRecentProject={handleRemoveRecentProject}
-          onCloseProject={handleCloseProject}
+          onOpenProject={openProject}
         />
 
-        <EditorPanel
-          selectedFile={selectedFile}
-          content={content}
-          onContentChange={setContent}
-        />
+        {/* Middle: Documents grid or Editor */}
+        {selectedFile ? (
+          <EditorPanel
+            selectedFile={selectedFile}
+            content={content}
+            onContentChange={setContent}
+            onBack={handleBackToDocuments}
+          />
+        ) : (
+          <DocumentsGrid
+            projectPath={projectPath}
+            projectName={projectName}
+            collections={collections}
+            selectedCollection={selectedCollection}
+            onSelectCollection={handleSelectCollection}
+            files={files}
+            selectedFile={selectedFile}
+            onSelectFile={handleSelectFile}
+            onNewDocument={handleNewDocument}
+          />
+        )}
 
-        <MetadataPanel
-          selectedFile={selectedFile}
-          frontmatter={frontmatter}
-          schema={schema}
-          onFrontmatterChange={setFrontmatter}
-        />
+        {/* Right: Metadata panel (only when file selected) */}
+        {selectedFile && (
+          <MetadataPanel
+            selectedFile={selectedFile}
+            frontmatter={frontmatter}
+            schema={schema}
+            onFrontmatterChange={setFrontmatter}
+          />
+        )}
       </div>
 
       {showNewFileModal && (

@@ -9,6 +9,8 @@ export interface Collection {
 export interface FileItem {
   name: string;
   path: string;
+  preview?: string;
+  collectionName?: string;
 }
 
 export interface RecentProject {
@@ -100,6 +102,7 @@ export interface ElectronAPI {
   getCollectionFiles: (
     collectionPath: string
   ) => Promise<FileItem[] | CollectionsResult>;
+  getAllFiles: (contentPath: string) => Promise<FileItem[] | CollectionsResult>;
   readFile: (filePath: string) => Promise<FileContent | CollectionsResult>;
   saveFile: (
     filePath: string,

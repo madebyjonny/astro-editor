@@ -373,6 +373,61 @@ ipcMain.handle(
   }
 );
 
+// Get all files from all collections
+ipcMain.handle(
+  "get-all-files",
+  async (_event: IpcMainInvokeEvent, contentPath: string) => {
+    try {
+      const items = fs.readdirSync(contentPath, { withFileTypes: true });
+      const collections = items.filter((item) => item.isDirectory());
+
+      const allFiles: Array<{
+        name: string;
+        path: string;
+        preview: string;
+        collectionName: string;
+      }> = [];
+
+      for (const collection of collections) {
+        const collectionPath = path.join(contentPath, collection.name);
+        const files = fs.readdirSync(collectionPath, { withFileTypes: true });
+
+        for (const file of files) {
+          if (
+            file.isFile() &&
+            (file.name.endsWith(".md") || file.name.endsWith(".mdx"))
+          ) {
+            const filePath = path.join(collectionPath, file.name);
+            let preview = "";
+
+            try {
+              const content = fs.readFileSync(filePath, "utf8");
+              const parsed = matter(content);
+              preview = parsed.content
+                .trim()
+                .substring(0, 200)
+                .replace(/\n/g, " ");
+            } catch {
+              // Ignore errors reading individual files
+            }
+
+            allFiles.push({
+              name: file.name,
+              path: filePath,
+              preview,
+              collectionName: collection.name,
+            });
+          }
+        }
+      }
+
+      return allFiles;
+    } catch (error) {
+      return { error: (error as Error).message };
+    }
+  }
+);
+
 // Get files in a collection
 ipcMain.handle(
   "get-collection-files",
@@ -385,10 +440,29 @@ ipcMain.handle(
             item.isFile() &&
             (item.name.endsWith(".md") || item.name.endsWith(".mdx"))
         )
-        .map((file) => ({
-          name: file.name,
-          path: path.join(collectionPath, file.name),
-        }));
+        .map((file) => {
+          const filePath = path.join(collectionPath, file.name);
+          let preview = "";
+
+          // Read file to get preview
+          try {
+            const content = fs.readFileSync(filePath, "utf8");
+            const parsed = matter(content);
+            // Get first 200 characters of content as preview
+            preview = parsed.content
+              .trim()
+              .substring(0, 200)
+              .replace(/\n/g, " ");
+          } catch {
+            // Ignore errors reading individual files
+          }
+
+          return {
+            name: file.name,
+            path: filePath,
+            preview,
+          };
+        });
       return files;
     } catch (error) {
       return { error: (error as Error).message };

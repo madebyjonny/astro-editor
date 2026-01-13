@@ -9,7 +9,6 @@ import "./Toolbar.css";
 
 function Toolbar(): React.ReactElement {
   const projectPath = useProjectStore((s) => s.projectPath);
-  const openProject = useProjectStore((s) => s.openProject);
   const selectedCollection = useProjectStore((s) => s.selectedCollection);
 
   const selectedFile = useEditorStore((s) => s.selectedFile);
@@ -45,9 +44,6 @@ function Toolbar(): React.ReactElement {
     <>
       <div className="toolbar">
         <h1>📝 Astro Content Editor</h1>
-        <button className="btn btn-primary" onClick={openProject}>
-          Open Project
-        </button>
         {selectedFile && (
           <button className="btn btn-success" onClick={save}>
             Save{" "}

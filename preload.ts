@@ -12,6 +12,8 @@ const electronAPI: ElectronAPI = {
     ipcRenderer.invoke("get-collections", contentPath),
   getCollectionFiles: (collectionPath: string) =>
     ipcRenderer.invoke("get-collection-files", collectionPath),
+  getAllFiles: (contentPath: string) =>
+    ipcRenderer.invoke("get-all-files", contentPath),
   readFile: (filePath: string) => ipcRenderer.invoke("read-file", filePath),
   saveFile: (
     filePath: string,

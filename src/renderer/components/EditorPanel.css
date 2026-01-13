@@ -14,11 +14,29 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 12px;
+}
+
+.editor-back-btn {
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: 4px;
+  transition: all 0.15s;
+}
+
+.editor-back-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #d4d4d4;
 }
 
 .editor-title {
   font-size: 14px;
   font-weight: 500;
+  flex: 1;
 }
 
 .editor-content {

@@ -8,12 +8,14 @@ interface EditorPanelProps {
   selectedFile: FileItem | null;
   content: string;
   onContentChange: (value: string) => void;
+  onBack?: () => void;
 }
 
 function EditorPanel({
   selectedFile,
   content,
   onContentChange,
+  onBack,
 }: EditorPanelProps): React.ReactElement {
   const [activeTab, setActiveTab] = useState<"edit" | "preview">("edit");
 
@@ -54,6 +56,11 @@ function EditorPanel({
   return (
     <div className="editor-panel">
       <div className="editor-header">
+        {onBack && (
+          <button className="editor-back-btn" onClick={onBack}>
+            ← Back
+          </button>
+        )}
         <span className="editor-title">📄 {selectedFile.name}</span>
         <div className="editor-tabs">
           <button
