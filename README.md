@@ -22,5 +22,5 @@ There still isn't a great way of managing content for these types of sites, so I
 
 - Convert to typescript ✅
 - Clean up the React Code, as its trash. (🟠 in progress)
-- Improve the look & feel (🟠 in progress)
+- Improve the look & feel ✅
 - Improve the preview 
