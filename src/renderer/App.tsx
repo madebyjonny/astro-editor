@@ -1,375 +1,138 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useEffect } from "react";
+import Toolbar from "./components/Toolbar";
 import Sidebar from "./components/Sidebar";
 import EditorPanel from "./components/EditorPanel";
 import MetadataPanel from "./components/MetadataPanel";
 import NewFileModal from "./components/NewFileModal";
-import type {
-  Collection,
-  FileItem,
-  RecentProject,
-  Schema,
-  Frontmatter,
-  DevServerStatus,
-  ProjectResult,
-  FileContent,
-  CollectionsResult,
-} from "../types";
+import {
+  useProjectStore,
+  useEditorStore,
+  useDevServerStore,
+  useUIStore,
+} from "./stores";
 
 function App(): React.ReactElement {
-  const [projectPath, setProjectPath] = useState<string | null>(null);
-  const [contentPath, setContentPath] = useState<string | null>(null);
-  const [collections, setCollections] = useState<Collection[]>([]);
-  const [selectedCollection, setSelectedCollection] =
-    useState<Collection | null>(null);
-  const [files, setFiles] = useState<FileItem[]>([]);
-  const [selectedFile, setSelectedFile] = useState<FileItem | null>(null);
-  const [fileContent, setFileContent] = useState<FileContent | null>(null);
-  const [frontmatter, setFrontmatter] = useState<Frontmatter>({});
-  const [content, setContent] = useState<string>("");
-  const [schema, setSchema] = useState<Schema>({});
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
-  const [showNewFileModal, setShowNewFileModal] = useState<boolean>(false);
-  const [recentProjects, setRecentProjects] = useState<RecentProject[]>([]);
-  const [devServerStatus, setDevServerStatus] = useState<DevServerStatus>({
-    isRunning: false,
-    isStarting: false,
-    port: null,
-    error: null,
-  });
+  // Project store
+  const projectPath = useProjectStore((s) => s.projectPath);
+  const contentPath = useProjectStore((s) => s.contentPath);
+  const collections = useProjectStore((s) => s.collections);
+  const selectedCollection = useProjectStore((s) => s.selectedCollection);
+  const files = useProjectStore((s) => s.files);
+  const recentProjects = useProjectStore((s) => s.recentProjects);
+  const selectCollection = useProjectStore((s) => s.selectCollection);
+  const closeProject = useProjectStore((s) => s.closeProject);
+  const openRecentProject = useProjectStore((s) => s.openRecentProject);
+  const removeRecentProject = useProjectStore((s) => s.removeRecentProject);
+  const refreshRecentProjects = useProjectStore((s) => s.refreshRecentProjects);
+  const refreshFiles = useProjectStore((s) => s.refreshFiles);
+
+  // Editor store
+  const selectedFile = useEditorStore((s) => s.selectedFile);
+  const content = useEditorStore((s) => s.content);
+  const frontmatter = useEditorStore((s) => s.frontmatter);
+  const schema = useEditorStore((s) => s.schema);
+  const selectFile = useEditorStore((s) => s.selectFile);
+  const setContent = useEditorStore((s) => s.setContent);
+  const setFrontmatter = useEditorStore((s) => s.setFrontmatter);
+  const loadSchema = useEditorStore((s) => s.loadSchema);
+  const createFile = useEditorStore((s) => s.createFile);
+  const resetEditor = useEditorStore((s) => s.reset);
+  const confirmUnsavedChanges = useEditorStore((s) => s.confirmUnsavedChanges);
+
+  // Dev server store
+  const isRunning = useDevServerStore((s) => s.isRunning);
+  const checkDevServerStatus = useDevServerStore((s) => s.checkStatus);
+  const stopDevServer = useDevServerStore((s) => s.stop);
+  const resetDevServer = useDevServerStore((s) => s.reset);
+
+  // UI store
+  const showNewFileModal = useUIStore((s) => s.showNewFileModal);
+  const closeNewFileModal = useUIStore((s) => s.closeNewFileModal);
 
   // Load recent projects on mount
   useEffect(() => {
-    const loadRecentProjects = async (): Promise<void> => {
-      const projects = await window.electronAPI.getRecentProjects();
-      setRecentProjects(projects);
-    };
-    loadRecentProjects();
-  }, []);
+    refreshRecentProjects();
+  }, [refreshRecentProjects]);
 
   // Check dev server status when project changes
   useEffect(() => {
-    const checkStatus = async (): Promise<void> => {
-      if (projectPath) {
-        const status = await window.electronAPI.checkProjectStatus(projectPath);
-        if (status.isRunning) {
-          setDevServerStatus((prev) => ({ ...prev, isRunning: true }));
-        }
-      } else {
-        setDevServerStatus({
-          isRunning: false,
-          isStarting: false,
-          port: null,
-          error: null,
-        });
-      }
-    };
-    checkStatus();
-  }, [projectPath]);
+    if (projectPath) {
+      checkDevServerStatus(projectPath);
+    } else {
+      resetDevServer();
+    }
+  }, [projectPath, checkDevServerStatus, resetDevServer]);
 
-  const loadProject = async (result: ProjectResult | null): Promise<void> => {
-    if (result && !result.error && result.projectPath && result.contentPath) {
-      setProjectPath(result.projectPath);
-      setContentPath(result.contentPath);
+  // Handle collection selection with schema loading
+  const handleSelectCollection = async (
+    collection: typeof selectedCollection
+  ): Promise<void> => {
+    await selectCollection(collection);
+    resetEditor();
 
-      const collectionsResult = await window.electronAPI.getCollections(
-        result.contentPath
-      );
-      if (!("error" in collectionsResult)) {
-        setCollections(collectionsResult as Collection[]);
-      }
-
-      // Reset state
-      setSelectedCollection(null);
-      setFiles([]);
-      setSelectedFile(null);
-      setFileContent(null);
-      setFrontmatter({});
-      setContent("");
-
-      // Refresh recent projects
-      const projects = await window.electronAPI.getRecentProjects();
-      setRecentProjects(projects);
-    } else if (result?.error) {
-      alert(result.error);
+    if (collection && contentPath) {
+      await loadSchema(contentPath, collection.name);
     }
   };
 
-  const handleOpenProject = async (): Promise<void> => {
-    const result = await window.electronAPI.openProject();
-    await loadProject(result);
+  // Handle project close
+  const handleCloseProject = async (): Promise<void> => {
+    if (!confirmUnsavedChanges()) return;
+
+    if (isRunning && projectPath) {
+      await stopDevServer(projectPath);
+    }
+
+    await closeProject();
+    resetEditor();
+    resetDevServer();
   };
 
-  const handleOpenRecentProject = async (path: string): Promise<void> => {
-    const result = await window.electronAPI.openProjectByPath(path);
-    await loadProject(result);
+  // Handle file selection
+  const handleSelectFile = async (file: typeof selectedFile): Promise<void> => {
+    if (file) {
+      await selectFile(file);
+    }
   };
 
+  // Handle recent project removal
   const handleRemoveRecentProject = async (
     path: string,
     e: React.MouseEvent
   ): Promise<void> => {
     e.stopPropagation();
-    const projects = await window.electronAPI.removeRecentProject(path);
-    setRecentProjects(projects);
+    await removeRecentProject(path);
   };
 
-  const handleCloseProject = async (): Promise<void> => {
-    if (hasUnsavedChanges) {
-      const confirm = window.confirm(
-        "You have unsaved changes. Do you want to discard them?"
-      );
-      if (!confirm) return;
-    }
-    // Stop dev server if running
-    if (devServerStatus.isRunning && projectPath) {
-      await window.electronAPI.stopDevServer(projectPath);
-    }
-    setProjectPath(null);
-    setContentPath(null);
-    setCollections([]);
-    setSelectedCollection(null);
-    setFiles([]);
-    setSelectedFile(null);
-    setFileContent(null);
-    setFrontmatter({});
-    setContent("");
-    setHasUnsavedChanges(false);
-    setDevServerStatus({
-      isRunning: false,
-      isStarting: false,
-      port: null,
-      error: null,
-    });
-  };
-
-  const handleStartDevServer = async (): Promise<void> => {
-    if (!projectPath) return;
-
-    // First check if project can run
-    const status = await window.electronAPI.checkProjectStatus(projectPath);
-    if (!status.canRun) {
-      setDevServerStatus((prev) => ({ ...prev, error: status.error || null }));
-      return;
-    }
-
-    setDevServerStatus((prev) => ({ ...prev, isStarting: true, error: null }));
-
-    const result = await window.electronAPI.startDevServer(projectPath);
-    if (result.success) {
-      setDevServerStatus({
-        isRunning: true,
-        isStarting: false,
-        port: result.port || null,
-        error: null,
-      });
-    } else {
-      setDevServerStatus({
-        isRunning: false,
-        isStarting: false,
-        port: null,
-        error: result.error || null,
-      });
-    }
-  };
-
-  const handleStopDevServer = async (): Promise<void> => {
-    if (!projectPath) return;
-    await window.electronAPI.stopDevServer(projectPath);
-    setDevServerStatus({
-      isRunning: false,
-      isStarting: false,
-      port: null,
-      error: null,
-    });
-  };
-
-  const handleOpenPreview = async (): Promise<void> => {
-    if (devServerStatus.port) {
-      await window.electronAPI.openInBrowser(
-        `http://localhost:${devServerStatus.port}`
-      );
-    }
-  };
-
-  const handleSelectCollection = async (
-    collection: Collection | null
-  ): Promise<void> => {
-    if (!collection) {
-      setSelectedCollection(null);
-      setFiles([]);
-      return;
-    }
-
-    setSelectedCollection(collection);
-    const filesResult = await window.electronAPI.getCollectionFiles(
-      collection.path
-    );
-    if (!("error" in filesResult)) {
-      setFiles(filesResult as FileItem[]);
-    }
-
-    // Get schema for this collection
-    if (contentPath) {
-      const schemaResult = await window.electronAPI.getCollectionSchema(
-        contentPath,
-        collection.name
-      );
-      setSchema(schemaResult);
-    }
-
-    // Reset file selection
-    setSelectedFile(null);
-    setFileContent(null);
-    setFrontmatter({});
-    setContent("");
-  };
-
-  const handleSelectFile = async (file: FileItem): Promise<void> => {
-    if (hasUnsavedChanges) {
-      const confirm = window.confirm(
-        "You have unsaved changes. Do you want to discard them?"
-      );
-      if (!confirm) return;
-    }
-
-    setSelectedFile(file);
-    const result = await window.electronAPI.readFile(file.path);
-    if (!("error" in result)) {
-      const fileResult = result as FileContent;
-      setFileContent(fileResult);
-      setFrontmatter(fileResult.frontmatter || {});
-      setContent(fileResult.content || "");
-      setHasUnsavedChanges(false);
-    }
-  };
-
-  const handleContentChange = useCallback((value: string): void => {
-    setContent(value || "");
-    setHasUnsavedChanges(true);
-  }, []);
-
-  const handleFrontmatterChange = useCallback(
-    (key: string, value: Frontmatter[string]): void => {
-      setFrontmatter((prev) => ({
-        ...prev,
-        [key]: value,
-      }));
-      setHasUnsavedChanges(true);
-    },
-    []
-  );
-
-  const handleSave = async (): Promise<void> => {
-    if (!selectedFile) return;
-
-    const result = await window.electronAPI.saveFile(
-      selectedFile.path,
-      frontmatter,
-      content
-    );
-    if (result.success) {
-      setHasUnsavedChanges(false);
-    } else {
-      alert("Failed to save: " + result.error);
-    }
-  };
-
+  // Handle file creation
   const handleCreateFile = async (
-    title: string,
-    newFrontmatter: Frontmatter
+    filename: string,
+    newFrontmatter: typeof frontmatter
   ): Promise<void> => {
     if (!selectedCollection) return;
 
-    const result = await window.electronAPI.createFile(
+    const result = await createFile(
       selectedCollection.path,
-      title,
-      newFrontmatter,
-      ""
+      filename,
+      newFrontmatter
     );
 
     if (result.success) {
-      // Refresh files list
-      const filesResult = await window.electronAPI.getCollectionFiles(
-        selectedCollection.path
-      );
-      if (!("error" in filesResult)) {
-        const filesList = filesResult as FileItem[];
-        setFiles(filesList);
+      await refreshFiles();
 
-        // Select the new file
-        const newFile = filesList.find((f) => f.path === result.path);
-        if (newFile) {
-          handleSelectFile(newFile);
-        }
+      // Select the new file
+      const newFile = files.find((f) => f.path === result.path);
+      if (newFile) {
+        await selectFile(newFile);
       }
 
-      setShowNewFileModal(false);
-    } else {
-      alert("Failed to create file: " + result.error);
+      closeNewFileModal();
     }
   };
 
   return (
     <div className="app-container">
-      <div className="toolbar">
-        <h1>📝 Astro Content Editor</h1>
-        <button className="btn btn-primary" onClick={handleOpenProject}>
-          Open Project
-        </button>
-        {selectedFile && (
-          <button className="btn btn-success" onClick={handleSave}>
-            Save{" "}
-            {hasUnsavedChanges && <span className="unsaved-indicator">●</span>}
-          </button>
-        )}
-        {selectedCollection && (
-          <button
-            className="btn btn-secondary"
-            onClick={() => setShowNewFileModal(true)}
-          >
-            + New File
-          </button>
-        )}
-
-        {/* Dev Server Controls */}
-        {projectPath && <div className="toolbar-divider" />}
-        {projectPath &&
-          !devServerStatus.isRunning &&
-          !devServerStatus.isStarting && (
-            <button className="btn btn-run" onClick={handleStartDevServer}>
-              ▶ Run Dev Server
-            </button>
-          )}
-        {projectPath && devServerStatus.isStarting && (
-          <button className="btn btn-run" disabled>
-            ⏳ Starting...
-          </button>
-        )}
-        {projectPath && devServerStatus.isRunning && (
-          <>
-            <button className="btn btn-stop" onClick={handleStopDevServer}>
-              ⏹ Stop
-            </button>
-            <button className="btn btn-preview" onClick={handleOpenPreview}>
-              🌐 Preview :{devServerStatus.port}
-            </button>
-          </>
-        )}
-      </div>
-
-      {/* Error Banner */}
-      {devServerStatus.error && (
-        <div className="error-banner">
-          <span>⚠️ {devServerStatus.error}</span>
-          <button
-            onClick={() =>
-              setDevServerStatus((prev) => ({ ...prev, error: null }))
-            }
-          >
-            ×
-          </button>
-        </div>
-      )}
+      <Toolbar />
 
       <div className="main-content">
         <Sidebar
@@ -381,7 +144,7 @@ function App(): React.ReactElement {
           selectedFile={selectedFile}
           onSelectFile={handleSelectFile}
           recentProjects={recentProjects}
-          onOpenRecentProject={handleOpenRecentProject}
+          onOpenRecentProject={openRecentProject}
           onRemoveRecentProject={handleRemoveRecentProject}
           onCloseProject={handleCloseProject}
         />
@@ -389,21 +152,21 @@ function App(): React.ReactElement {
         <EditorPanel
           selectedFile={selectedFile}
           content={content}
-          onContentChange={handleContentChange}
+          onContentChange={setContent}
         />
 
         <MetadataPanel
           selectedFile={selectedFile}
           frontmatter={frontmatter}
           schema={schema}
-          onFrontmatterChange={handleFrontmatterChange}
+          onFrontmatterChange={setFrontmatter}
         />
       </div>
 
       {showNewFileModal && (
         <NewFileModal
           schema={schema}
-          onClose={() => setShowNewFileModal(false)}
+          onClose={closeNewFileModal}
           onCreate={handleCreateFile}
         />
       )}
