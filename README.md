@@ -5,8 +5,9 @@
 This is a project born of of frustration (headless CMS' are more hassle than they are worth for small blog / marketing sites). I migrated a website from a website away from a headless CMS service to Astro making use of MDX files. 
 There still isn't a great way of managing content for these types of sites, so I decided to proceed with this idea of a desktop app for your Astro website. 
 
-<img width="1176" height="828" alt="Screenshot 2026-01-13 at 19 02 49" src="https://github.com/user-attachments/assets/1e210f73-b23f-4ce3-a04c-fe567b3b6ee2" />
-<img width="1172" height="823" alt="Screenshot 2026-01-13 at 19 02 57" src="https://github.com/user-attachments/assets/de5d9f06-344a-41e6-a510-a17d835d5cbb" />
+<img width="1416" height="913" alt="Screenshot 2026-01-13 at 20 21 17" src="https://github.com/user-attachments/assets/20514284-8ecb-4753-baf3-c7f9e068c5fe" />
+<img width="1411" height="914" alt="Screenshot 2026-01-13 at 20 21 27" src="https://github.com/user-attachments/assets/0238cab9-b542-46ba-b08d-244674fd6ab1" />
+
 
 
 ## Features 
