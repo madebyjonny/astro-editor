@@ -1,8 +1,5 @@
 import React from "react";
-import {
-  useProjectStore,
-  useDevServerStore,
-} from "../stores";
+import { useProjectStore, useDevServerStore } from "../stores";
 import "./Toolbar.css";
 
 function Toolbar(): React.ReactElement {
@@ -37,11 +34,15 @@ function Toolbar(): React.ReactElement {
         <div className="toolbar-left">
           <span className="toolbar-title">Astro Editor</span>
         </div>
-        
+
         <div className="toolbar-right">
           {/* Dev Server Controls - minimal style */}
           {projectPath && !isRunning && !isStarting && (
-            <button className="toolbar-icon-btn" onClick={handleStartDevServer} title="Start dev server">
+            <button
+              className="toolbar-icon-btn"
+              onClick={handleStartDevServer}
+              title="Start dev server"
+            >
               ▶
             </button>
           )}
@@ -52,10 +53,18 @@ function Toolbar(): React.ReactElement {
           )}
           {projectPath && isRunning && (
             <>
-              <button className="toolbar-icon-btn running" onClick={handleStopDevServer} title="Stop dev server">
+              <button
+                className="toolbar-icon-btn running"
+                onClick={handleStopDevServer}
+                title="Stop dev server"
+              >
                 ⏹
               </button>
-              <button className="toolbar-icon-btn preview" onClick={openPreview} title={`Preview on port ${port}`}>
+              <button
+                className="toolbar-icon-btn preview"
+                onClick={openPreview}
+                title={`Preview on port ${port}`}
+              >
                 ↗
               </button>
             </>

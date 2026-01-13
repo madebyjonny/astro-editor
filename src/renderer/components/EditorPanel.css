@@ -6,108 +6,7 @@
   overflow: hidden;
   background: transparent;
   position: relative;
-  padding: 12px 16px 16px;
-}
-
-/* Floating Toolbar */
-.editor-floating-toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px;
-  margin-bottom: 12px;
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.floating-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  border: none;
-  background: rgba(255, 255, 255, 0.08);
-  border-radius: 10px;
-  color: #b0b0b0;
-  font-size: 20px;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-
-.floating-btn:hover {
-  background: rgba(255, 255, 255, 0.15);
-  color: #fff;
-}
-
-.floating-btn.back-btn {
-  font-size: 24px;
-  font-weight: 300;
-}
-
-/* Filename pill in center */
-.floating-filename {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  background: rgba(255, 255, 255, 0.06);
-  border-radius: 10px;
-  flex: 1;
-  max-width: 300px;
-  margin: 0 12px;
-  justify-content: center;
-}
-
-.filename-text {
-  font-size: 13px;
-  font-weight: 500;
-  color: #d4d4d4;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.unsaved-dot {
-  color: #4ade80;
-  font-size: 10px;
-}
-
-/* Floating Tabs (Edit/Preview toggle) */
-.floating-tabs {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  padding: 4px;
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: 10px;
-}
-
-.floating-tab {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 6px 14px;
-  border: none;
-  background: transparent;
-  border-radius: 8px;
-  color: #888;
-  font-size: 12px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-
-.floating-tab:hover {
-  color: #d4d4d4;
-}
-
-.floating-tab.active {
-  background: rgba(255, 255, 255, 0.12);
-  color: #fff;
+  padding: 0;
 }
 
 /* Content Wrapper with rounded corners */
@@ -120,23 +19,141 @@
   border-radius: 16px 16px 0 0;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-bottom: none;
+  margin: 0;
+  position: relative;
 }
 
-/* Content Area */
+/* Floating Toolbar - absolutely positioned over content */
+.editor-floating-toolbar {
+  position: absolute;
+  z-index: 100;
+  width: 100%;
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  pointer-events: none;
+}
+
+.editor-floating-toolbar > * {
+  pointer-events: auto; /* Re-enable clicks on actual elements */
+}
+
+.floating-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  height: auto;
+  padding: 8px 14px;
+  border: none;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #888;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.floating-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #d4d4d4;
+}
+
+.floating-btn.back-btn {
+  font-size: 16px;
+  font-weight: 400;
+  padding: 8px 12px;
+}
+
+/* Filename pill in center */
+.floating-filename {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  max-width: 400px;
+  justify-content: center;
+}
+
+.filename-text {
+  font-size: 13px;
+  font-weight: 400;
+  color: #888;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.unsaved-dot {
+  color: #4ade80;
+  font-size: 8px;
+}
+
+/* Floating Tabs (Edit/Preview toggle) */
+.floating-tabs {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.floating-tab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  border: none;
+  background: transparent;
+  border-radius: 18px;
+  color: #888;
+  font-size: 13px;
+  font-weight: 400;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.floating-tab:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #d4d4d4;
+}
+
+.floating-tab.active {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+
+/* Content Area - scrollable, content goes under toolbar */
 .editor-content {
-  flex: 1;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   overflow: auto;
-  padding: 0;
   display: flex;
   flex-direction: column;
-  background: #1a1a1a;
+  background: transparent;
 }
 
 /* Markdown Editor */
 .markdown-textarea {
   flex: 1;
   width: 100%;
-  padding: 24px;
+  padding: 80px 24px 24px 24px; /* Top padding for toolbar */
   border: none;
   background: transparent;
   color: #d4d4d4;
@@ -156,7 +173,7 @@
 /* Markdown Preview */
 .markdown-preview {
   flex: 1;
-  padding: 16px 24px;
+  padding: 80px 24px 24px 24px; /* Top padding for toolbar */
   overflow-y: auto;
   color: #d4d4d4;
   line-height: 1.7;

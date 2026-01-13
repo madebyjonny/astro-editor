@@ -57,42 +57,51 @@ function EditorPanel({
 
   return (
     <div className="editor-panel">
-      {/* Floating toolbar */}
-      <div className="editor-floating-toolbar">
-        {/* Left: Back button */}
-        {onBack && (
-          <button className="floating-btn back-btn" onClick={onBack} title="Back to documents">
-            ‹
-          </button>
-        )}
-        
-        {/* Center: Filename pill */}
-        <div className="floating-filename">
-          <span className="filename-text">{selectedFile.name.replace(/\.mdx?$/, "")}</span>
-          {hasUnsavedChanges && <span className="unsaved-dot">●</span>}
-        </div>
-        
-        {/* Right: Edit/Preview toggle */}
-        <div className="floating-tabs">
-          <button
-            className={`floating-tab ${activeTab === "edit" ? "active" : ""}`}
-            onClick={() => setActiveTab("edit")}
-            title="Edit mode"
-          >
-            Edit
-          </button>
-          <button
-            className={`floating-tab ${activeTab === "preview" ? "active" : ""}`}
-            onClick={() => setActiveTab("preview")}
-            title="Preview mode"
-          >
-            Preview
-          </button>
-        </div>
-      </div>
-
       {/* Content area with rounded corners */}
       <div className="editor-content-wrapper">
+        {/* Floating toolbar - absolutely positioned over content */}
+        <div className="editor-floating-toolbar">
+          {/* Left: Back button */}
+          {onBack && (
+            <button
+              className="floating-btn back-btn"
+              onClick={onBack}
+              title="Back to documents"
+            >
+              ‹
+            </button>
+          )}
+
+          {/* Center: Filename pill */}
+          <div className="floating-filename">
+            <span className="filename-text">
+              {selectedFile.name.replace(/\.mdx?$/, "")}
+            </span>
+            {hasUnsavedChanges && <span className="unsaved-dot">●</span>}
+          </div>
+
+          {/* Right: Edit/Preview toggle */}
+          <div className="floating-tabs">
+            <button
+              className={`floating-tab ${activeTab === "edit" ? "active" : ""}`}
+              onClick={() => setActiveTab("edit")}
+              title="Edit mode"
+            >
+              Edit
+            </button>
+            <button
+              className={`floating-tab ${
+                activeTab === "preview" ? "active" : ""
+              }`}
+              onClick={() => setActiveTab("preview")}
+              title="Preview mode"
+            >
+              Preview
+            </button>
+          </div>
+        </div>
+
+        {/* Scrollable content area */}
         <div className="editor-content">
           {activeTab === "edit" ? (
             <textarea
@@ -107,7 +116,9 @@ function EditorPanel({
             />
           ) : (
             <div className="markdown-preview">
-              <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                {content}
+              </ReactMarkdown>
             </div>
           )}
         </div>
