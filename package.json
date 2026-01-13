@@ -2,11 +2,13 @@
   "name": "astro-content-editor",
   "version": "1.0.0",
   "description": "An Electron app for editing Astro site markdown content",
-  "main": "main.js",
+  "main": "dist-electron/main.js",
   "scripts": {
-    "start": "concurrently \"npm run dev\" \"wait-on http://localhost:3000 && NODE_ENV=development electron .\"",
+    "start": "npm run build:electron && concurrently \"npm run dev\" \"wait-on http://localhost:3000 && NODE_ENV=development electron .\"",
     "dev": "vite",
-    "build": "vite build",
+    "build": "npm run build:electron && vite build",
+    "build:electron": "tsc -p tsconfig.electron.json",
+    "typecheck": "tsc --noEmit",
     "preview": "vite preview",
     "electron": "electron .",
     "package": "npm run build && electron ."
@@ -24,8 +26,13 @@
     "slugify": "^1.6.6"
   },
   "devDependencies": {
+    "@types/node": "^25.0.7",
+    "@types/react": "^19.2.8",
+    "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^4.7.0",
     "concurrently": "^9.2.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3",
     "vite": "^6.4.1",
     "wait-on": "^9.0.3"
   }

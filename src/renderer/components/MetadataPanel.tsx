@@ -1,11 +1,26 @@
-import React, { useState } from "react";
+import React, { useState, KeyboardEvent, ChangeEvent } from "react";
+import type { FileItem, Schema, Frontmatter, FieldSchema } from "../../types";
+
+interface MetadataPanelProps {
+  selectedFile: FileItem | null;
+  frontmatter: Frontmatter;
+  schema: Schema;
+  onFrontmatterChange: (key: string, value: Frontmatter[string]) => void;
+}
+
+interface ArrayFieldProps {
+  fieldKey: string;
+  value: string[];
+  isRequired: boolean;
+  onChange: (newValue: string[]) => void;
+}
 
 function MetadataPanel({
   selectedFile,
   frontmatter,
   schema,
   onFrontmatterChange,
-}) {
+}: MetadataPanelProps): React.ReactElement {
   if (!selectedFile) {
     return (
       <div className="metadata-panel">
@@ -17,7 +32,10 @@ function MetadataPanel({
     );
   }
 
-  const renderField = (key, fieldSchema) => {
+  const renderField = (
+    key: string,
+    fieldSchema: FieldSchema
+  ): React.ReactElement => {
     const value = frontmatter[key];
     const isRequired = fieldSchema?.required;
 
@@ -29,8 +47,10 @@ function MetadataPanel({
               <input
                 type="checkbox"
                 className="field-input"
-                checked={value || false}
-                onChange={(e) => onFrontmatterChange(key, e.target.checked)}
+                checked={(value as boolean) || false}
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                  onFrontmatterChange(key, e.target.checked)
+                }
               />
               <span className="field-label" style={{ marginBottom: 0 }}>
                 {key}
@@ -50,8 +70,12 @@ function MetadataPanel({
             <input
               type="date"
               className="field-input"
-              value={value ? new Date(value).toISOString().split("T")[0] : ""}
-              onChange={(e) =>
+              value={
+                value
+                  ? new Date(value as string | Date).toISOString().split("T")[0]
+                  : ""
+              }
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>
                 onFrontmatterChange(
                   key,
                   e.target.value ? new Date(e.target.value) : null
@@ -71,8 +95,8 @@ function MetadataPanel({
             <input
               type="number"
               className="field-input"
-              value={value || ""}
-              onChange={(e) =>
+              value={(value as number) || ""}
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>
                 onFrontmatterChange(
                   key,
                   e.target.value ? Number(e.target.value) : ""
@@ -87,7 +111,7 @@ function MetadataPanel({
           <ArrayField
             key={key}
             fieldKey={key}
-            value={value || []}
+            value={(value as string[]) || []}
             isRequired={isRequired}
             onChange={(newValue) => onFrontmatterChange(key, newValue)}
           />
@@ -103,8 +127,10 @@ function MetadataPanel({
             <input
               type="text"
               className="field-input"
-              value={value || ""}
-              onChange={(e) => onFrontmatterChange(key, e.target.value)}
+              value={(value as string) || ""}
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                onFrontmatterChange(key, e.target.value)
+              }
             />
           </div>
         );
@@ -123,7 +149,7 @@ function MetadataPanel({
       <div className="metadata-content">
         {Array.from(allFields).map((key) => {
           const fieldSchema = schema[key] || {
-            type: "string",
+            type: "string" as const,
             required: false,
           };
           return renderField(key, fieldSchema);
@@ -133,22 +159,27 @@ function MetadataPanel({
   );
 }
 
-function ArrayField({ fieldKey, value, isRequired, onChange }) {
-  const [inputValue, setInputValue] = useState("");
+function ArrayField({
+  fieldKey,
+  value,
+  isRequired,
+  onChange,
+}: ArrayFieldProps): React.ReactElement {
+  const [inputValue, setInputValue] = useState<string>("");
 
-  const handleAdd = () => {
+  const handleAdd = (): void => {
     if (inputValue.trim()) {
       onChange([...value, inputValue.trim()]);
       setInputValue("");
     }
   };
 
-  const handleRemove = (index) => {
+  const handleRemove = (index: number): void => {
     const newValue = value.filter((_, i) => i !== index);
     onChange(newValue);
   };
 
-  const handleKeyDown = (e) => {
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>): void => {
     if (e.key === "Enter") {
       e.preventDefault();
       handleAdd();
@@ -179,7 +210,9 @@ function ArrayField({ fieldKey, value, isRequired, onChange }) {
         type="text"
         className="field-input"
         value={inputValue}
-        onChange={(e) => setInputValue(e.target.value)}
+        onChange={(e: ChangeEvent<HTMLInputElement>) =>
+          setInputValue(e.target.value)
+        }
         onKeyDown={handleKeyDown}
         placeholder="Type and press Enter to add"
       />

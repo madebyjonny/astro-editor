@@ -3,22 +3,34 @@ import Sidebar from "./components/Sidebar";
 import EditorPanel from "./components/EditorPanel";
 import MetadataPanel from "./components/MetadataPanel";
 import NewFileModal from "./components/NewFileModal";
+import type {
+  Collection,
+  FileItem,
+  RecentProject,
+  Schema,
+  Frontmatter,
+  DevServerStatus,
+  ProjectResult,
+  FileContent,
+  CollectionsResult,
+} from "../types";
 
-function App() {
-  const [projectPath, setProjectPath] = useState(null);
-  const [contentPath, setContentPath] = useState(null);
-  const [collections, setCollections] = useState([]);
-  const [selectedCollection, setSelectedCollection] = useState(null);
-  const [files, setFiles] = useState([]);
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [fileContent, setFileContent] = useState(null);
-  const [frontmatter, setFrontmatter] = useState({});
-  const [content, setContent] = useState("");
-  const [schema, setSchema] = useState({});
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-  const [showNewFileModal, setShowNewFileModal] = useState(false);
-  const [recentProjects, setRecentProjects] = useState([]);
-  const [devServerStatus, setDevServerStatus] = useState({
+function App(): React.ReactElement {
+  const [projectPath, setProjectPath] = useState<string | null>(null);
+  const [contentPath, setContentPath] = useState<string | null>(null);
+  const [collections, setCollections] = useState<Collection[]>([]);
+  const [selectedCollection, setSelectedCollection] =
+    useState<Collection | null>(null);
+  const [files, setFiles] = useState<FileItem[]>([]);
+  const [selectedFile, setSelectedFile] = useState<FileItem | null>(null);
+  const [fileContent, setFileContent] = useState<FileContent | null>(null);
+  const [frontmatter, setFrontmatter] = useState<Frontmatter>({});
+  const [content, setContent] = useState<string>("");
+  const [schema, setSchema] = useState<Schema>({});
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
+  const [showNewFileModal, setShowNewFileModal] = useState<boolean>(false);
+  const [recentProjects, setRecentProjects] = useState<RecentProject[]>([]);
+  const [devServerStatus, setDevServerStatus] = useState<DevServerStatus>({
     isRunning: false,
     isStarting: false,
     port: null,
@@ -27,7 +39,7 @@ function App() {
 
   // Load recent projects on mount
   useEffect(() => {
-    const loadRecentProjects = async () => {
+    const loadRecentProjects = async (): Promise<void> => {
       const projects = await window.electronAPI.getRecentProjects();
       setRecentProjects(projects);
     };
@@ -36,7 +48,7 @@ function App() {
 
   // Check dev server status when project changes
   useEffect(() => {
-    const checkStatus = async () => {
+    const checkStatus = async (): Promise<void> => {
       if (projectPath) {
         const status = await window.electronAPI.checkProjectStatus(projectPath);
         if (status.isRunning) {
@@ -54,16 +66,16 @@ function App() {
     checkStatus();
   }, [projectPath]);
 
-  const loadProject = async (result) => {
-    if (result && !result.error) {
+  const loadProject = async (result: ProjectResult | null): Promise<void> => {
+    if (result && !result.error && result.projectPath && result.contentPath) {
       setProjectPath(result.projectPath);
       setContentPath(result.contentPath);
 
       const collectionsResult = await window.electronAPI.getCollections(
         result.contentPath
       );
-      if (!collectionsResult.error) {
-        setCollections(collectionsResult);
+      if (!("error" in collectionsResult)) {
+        setCollections(collectionsResult as Collection[]);
       }
 
       // Reset state
@@ -82,23 +94,26 @@ function App() {
     }
   };
 
-  const handleOpenProject = async () => {
+  const handleOpenProject = async (): Promise<void> => {
     const result = await window.electronAPI.openProject();
     await loadProject(result);
   };
 
-  const handleOpenRecentProject = async (path) => {
+  const handleOpenRecentProject = async (path: string): Promise<void> => {
     const result = await window.electronAPI.openProjectByPath(path);
     await loadProject(result);
   };
 
-  const handleRemoveRecentProject = async (path, e) => {
+  const handleRemoveRecentProject = async (
+    path: string,
+    e: React.MouseEvent
+  ): Promise<void> => {
     e.stopPropagation();
     const projects = await window.electronAPI.removeRecentProject(path);
     setRecentProjects(projects);
   };
 
-  const handleCloseProject = async () => {
+  const handleCloseProject = async (): Promise<void> => {
     if (hasUnsavedChanges) {
       const confirm = window.confirm(
         "You have unsaved changes. Do you want to discard them?"
@@ -127,13 +142,13 @@ function App() {
     });
   };
 
-  const handleStartDevServer = async () => {
+  const handleStartDevServer = async (): Promise<void> => {
     if (!projectPath) return;
 
     // First check if project can run
     const status = await window.electronAPI.checkProjectStatus(projectPath);
     if (!status.canRun) {
-      setDevServerStatus((prev) => ({ ...prev, error: status.error }));
+      setDevServerStatus((prev) => ({ ...prev, error: status.error || null }));
       return;
     }
 
@@ -144,7 +159,7 @@ function App() {
       setDevServerStatus({
         isRunning: true,
         isStarting: false,
-        port: result.port,
+        port: result.port || null,
         error: null,
       });
     } else {
@@ -152,12 +167,12 @@ function App() {
         isRunning: false,
         isStarting: false,
         port: null,
-        error: result.error,
+        error: result.error || null,
       });
     }
   };
 
-  const handleStopDevServer = async () => {
+  const handleStopDevServer = async (): Promise<void> => {
     if (!projectPath) return;
     await window.electronAPI.stopDevServer(projectPath);
     setDevServerStatus({
@@ -168,7 +183,7 @@ function App() {
     });
   };
 
-  const handleOpenPreview = async () => {
+  const handleOpenPreview = async (): Promise<void> => {
     if (devServerStatus.port) {
       await window.electronAPI.openInBrowser(
         `http://localhost:${devServerStatus.port}`
@@ -176,21 +191,31 @@ function App() {
     }
   };
 
-  const handleSelectCollection = async (collection) => {
+  const handleSelectCollection = async (
+    collection: Collection | null
+  ): Promise<void> => {
+    if (!collection) {
+      setSelectedCollection(null);
+      setFiles([]);
+      return;
+    }
+
     setSelectedCollection(collection);
     const filesResult = await window.electronAPI.getCollectionFiles(
       collection.path
     );
-    if (!filesResult.error) {
-      setFiles(filesResult);
+    if (!("error" in filesResult)) {
+      setFiles(filesResult as FileItem[]);
     }
 
     // Get schema for this collection
-    const schemaResult = await window.electronAPI.getCollectionSchema(
-      contentPath,
-      collection.name
-    );
-    setSchema(schemaResult);
+    if (contentPath) {
+      const schemaResult = await window.electronAPI.getCollectionSchema(
+        contentPath,
+        collection.name
+      );
+      setSchema(schemaResult);
+    }
 
     // Reset file selection
     setSelectedFile(null);
@@ -199,7 +224,7 @@ function App() {
     setContent("");
   };
 
-  const handleSelectFile = async (file) => {
+  const handleSelectFile = async (file: FileItem): Promise<void> => {
     if (hasUnsavedChanges) {
       const confirm = window.confirm(
         "You have unsaved changes. Do you want to discard them?"
@@ -209,28 +234,32 @@ function App() {
 
     setSelectedFile(file);
     const result = await window.electronAPI.readFile(file.path);
-    if (!result.error) {
-      setFileContent(result);
-      setFrontmatter(result.frontmatter || {});
-      setContent(result.content || "");
+    if (!("error" in result)) {
+      const fileResult = result as FileContent;
+      setFileContent(fileResult);
+      setFrontmatter(fileResult.frontmatter || {});
+      setContent(fileResult.content || "");
       setHasUnsavedChanges(false);
     }
   };
 
-  const handleContentChange = useCallback((value) => {
+  const handleContentChange = useCallback((value: string): void => {
     setContent(value || "");
     setHasUnsavedChanges(true);
   }, []);
 
-  const handleFrontmatterChange = useCallback((key, value) => {
-    setFrontmatter((prev) => ({
-      ...prev,
-      [key]: value,
-    }));
-    setHasUnsavedChanges(true);
-  }, []);
+  const handleFrontmatterChange = useCallback(
+    (key: string, value: Frontmatter[string]): void => {
+      setFrontmatter((prev) => ({
+        ...prev,
+        [key]: value,
+      }));
+      setHasUnsavedChanges(true);
+    },
+    []
+  );
 
-  const handleSave = async () => {
+  const handleSave = async (): Promise<void> => {
     if (!selectedFile) return;
 
     const result = await window.electronAPI.saveFile(
@@ -245,7 +274,10 @@ function App() {
     }
   };
 
-  const handleCreateFile = async (title, newFrontmatter) => {
+  const handleCreateFile = async (
+    title: string,
+    newFrontmatter: Frontmatter
+  ): Promise<void> => {
     if (!selectedCollection) return;
 
     const result = await window.electronAPI.createFile(
@@ -260,14 +292,15 @@ function App() {
       const filesResult = await window.electronAPI.getCollectionFiles(
         selectedCollection.path
       );
-      if (!filesResult.error) {
-        setFiles(filesResult);
-      }
+      if (!("error" in filesResult)) {
+        const filesList = filesResult as FileItem[];
+        setFiles(filesList);
 
-      // Select the new file
-      const newFile = filesResult.find((f) => f.path === result.path);
-      if (newFile) {
-        handleSelectFile(newFile);
+        // Select the new file
+        const newFile = filesList.find((f) => f.path === result.path);
+        if (newFile) {
+          handleSelectFile(newFile);
+        }
       }
 
       setShowNewFileModal(false);

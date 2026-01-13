@@ -1,4 +1,19 @@
 import React from "react";
+import type { Collection, FileItem, RecentProject } from "../../types";
+
+interface SidebarProps {
+  projectPath: string | null;
+  collections: Collection[];
+  selectedCollection: Collection | null;
+  onSelectCollection: (collection: Collection | null) => void;
+  files: FileItem[];
+  selectedFile: FileItem | null;
+  onSelectFile: (file: FileItem) => void;
+  recentProjects: RecentProject[];
+  onOpenRecentProject: (path: string) => void;
+  onRemoveRecentProject: (path: string, e: React.MouseEvent) => void;
+  onCloseProject: () => void;
+}
 
 function Sidebar({
   projectPath,
@@ -12,7 +27,7 @@ function Sidebar({
   onOpenRecentProject,
   onRemoveRecentProject,
   onCloseProject,
-}) {
+}: SidebarProps): React.ReactElement {
   return (
     <div className="sidebar">
       {/* Show files view when a collection is selected */}

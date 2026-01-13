@@ -1,14 +1,25 @@
-import React, { useState } from "react";
+import React, { useState, KeyboardEvent, ChangeEvent } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import type { FileItem } from "../../types";
 
-function EditorPanel({ selectedFile, content, onContentChange }) {
-  const [activeTab, setActiveTab] = useState("edit");
+interface EditorPanelProps {
+  selectedFile: FileItem | null;
+  content: string;
+  onContentChange: (value: string) => void;
+}
 
-  const handleKeyDown = (e) => {
+function EditorPanel({
+  selectedFile,
+  content,
+  onContentChange,
+}: EditorPanelProps): React.ReactElement {
+  const [activeTab, setActiveTab] = useState<"edit" | "preview">("edit");
+
+  const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>): void => {
     if (e.key === "Tab") {
       e.preventDefault();
-      const textarea = e.target;
+      const textarea = e.currentTarget;
       const start = textarea.selectionStart;
       const end = textarea.selectionEnd;
 
@@ -63,10 +74,12 @@ function EditorPanel({ selectedFile, content, onContentChange }) {
           <textarea
             className="markdown-textarea"
             value={content}
-            onChange={(e) => onContentChange(e.target.value)}
+            onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
+              onContentChange(e.target.value)
+            }
             onKeyDown={handleKeyDown}
             placeholder="Write your markdown content here..."
-            spellCheck="false"
+            spellCheck={false}
           />
         ) : (
           <div className="markdown-preview">

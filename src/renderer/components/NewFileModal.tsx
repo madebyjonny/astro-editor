@@ -1,9 +1,34 @@
-import React, { useState, useMemo } from "react";
+import React, {
+  useState,
+  useMemo,
+  FormEvent,
+  KeyboardEvent,
+  ChangeEvent,
+} from "react";
 import slugify from "slugify";
+import type { Schema, Frontmatter, FieldSchema } from "../../types";
 
-function NewFileModal({ schema, onClose, onCreate }) {
-  const [formData, setFormData] = useState(() => {
-    const initial = {};
+interface NewFileModalProps {
+  schema: Schema;
+  onClose: () => void;
+  onCreate: (filename: string, frontmatter: Frontmatter) => void;
+}
+
+interface FormData {
+  [key: string]: string | number | boolean | string[] | Date | null;
+}
+
+interface TagInputs {
+  [key: string]: string;
+}
+
+function NewFileModal({
+  schema,
+  onClose,
+  onCreate,
+}: NewFileModalProps): React.ReactElement {
+  const [formData, setFormData] = useState<FormData>(() => {
+    const initial: FormData = {};
     Object.keys(schema).forEach((key) => {
       if (schema[key].type === "boolean") {
         initial[key] = false;
@@ -18,35 +43,35 @@ function NewFileModal({ schema, onClose, onCreate }) {
     return initial;
   });
 
-  const [tagInputs, setTagInputs] = useState({});
+  const [tagInputs, setTagInputs] = useState<TagInputs>({});
 
   const filename = useMemo(() => {
-    const title = formData.title || formData.name || "";
+    const title = (formData.title as string) || (formData.name as string) || "";
     if (!title) return "";
     return slugify(title, { lower: true, strict: true }) + ".md";
   }, [formData.title, formData.name]);
 
-  const handleChange = (key, value) => {
+  const handleChange = (key: string, value: FormData[string]): void => {
     setFormData((prev) => ({
       ...prev,
       [key]: value,
     }));
   };
 
-  const handleAddTag = (key) => {
+  const handleAddTag = (key: string): void => {
     const input = tagInputs[key];
     if (input?.trim()) {
-      handleChange(key, [...(formData[key] || []), input.trim()]);
+      handleChange(key, [...((formData[key] as string[]) || []), input.trim()]);
       setTagInputs((prev) => ({ ...prev, [key]: "" }));
     }
   };
 
-  const handleRemoveTag = (key, index) => {
-    const newValue = formData[key].filter((_, i) => i !== index);
+  const handleRemoveTag = (key: string, index: number): void => {
+    const newValue = (formData[key] as string[]).filter((_, i) => i !== index);
     handleChange(key, newValue);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
 
     // Validate required fields
@@ -65,17 +90,20 @@ function NewFileModal({ schema, onClose, onCreate }) {
     }
 
     // Convert date strings to Date objects for frontmatter
-    const frontmatter = { ...formData };
+    const frontmatter: Frontmatter = { ...formData };
     Object.keys(schema).forEach((key) => {
       if (schema[key].type === "date" && frontmatter[key]) {
-        frontmatter[key] = new Date(frontmatter[key]);
+        frontmatter[key] = new Date(frontmatter[key] as string);
       }
     });
 
     onCreate(filename, frontmatter);
   };
 
-  const renderField = (key, fieldSchema) => {
+  const renderField = (
+    key: string,
+    fieldSchema: FieldSchema
+  ): React.ReactElement => {
     const isRequired = fieldSchema?.required;
 
     switch (fieldSchema?.type) {
@@ -86,8 +114,10 @@ function NewFileModal({ schema, onClose, onCreate }) {
               <input
                 type="checkbox"
                 className="field-input"
-                checked={formData[key] || false}
-                onChange={(e) => handleChange(key, e.target.checked)}
+                checked={(formData[key] as boolean) || false}
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                  handleChange(key, e.target.checked)
+                }
               />
               <span className="field-label" style={{ marginBottom: 0 }}>
                 {key}
@@ -107,8 +137,10 @@ function NewFileModal({ schema, onClose, onCreate }) {
             <input
               type="date"
               className="field-input"
-              value={formData[key] || ""}
-              onChange={(e) => handleChange(key, e.target.value)}
+              value={(formData[key] as string) || ""}
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                handleChange(key, e.target.value)
+              }
             />
           </div>
         );
@@ -123,8 +155,8 @@ function NewFileModal({ schema, onClose, onCreate }) {
             <input
               type="number"
               className="field-input"
-              value={formData[key] || ""}
-              onChange={(e) =>
+              value={(formData[key] as number) || ""}
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>
                 handleChange(key, e.target.value ? Number(e.target.value) : "")
               }
             />
@@ -139,7 +171,7 @@ function NewFileModal({ schema, onClose, onCreate }) {
               {isRequired && <span className="required">*</span>}
             </label>
             <div className="tags-container">
-              {(formData[key] || []).map((item, index) => (
+              {((formData[key] as string[]) || []).map((item, index) => (
                 <span key={index} className="tag">
                   {item}
                   <button
@@ -156,10 +188,10 @@ function NewFileModal({ schema, onClose, onCreate }) {
               type="text"
               className="field-input"
               value={tagInputs[key] || ""}
-              onChange={(e) =>
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>
                 setTagInputs((prev) => ({ ...prev, [key]: e.target.value }))
               }
-              onKeyDown={(e) => {
+              onKeyDown={(e: KeyboardEvent<HTMLInputElement>) => {
                 if (e.key === "Enter") {
                   e.preventDefault();
                   handleAddTag(key);
@@ -180,8 +212,10 @@ function NewFileModal({ schema, onClose, onCreate }) {
             <input
               type="text"
               className="field-input"
-              value={formData[key] || ""}
-              onChange={(e) => handleChange(key, e.target.value)}
+              value={(formData[key] as string) || ""}
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                handleChange(key, e.target.value)
+              }
             />
           </div>
         );
