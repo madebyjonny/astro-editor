@@ -5,6 +5,7 @@ import {
   useDevServerStore,
   useUIStore,
 } from "../stores";
+import "./Toolbar.css";
 
 function Toolbar(): React.ReactElement {
   const projectPath = useProjectStore((s) => s.projectPath);

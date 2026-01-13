@@ -1,5 +1,6 @@
 import React from "react";
 import type { Collection, FileItem, RecentProject } from "../../types";
+import "./Sidebar.css";
 
 interface SidebarProps {
   projectPath: string | null;

@@ -2,6 +2,7 @@ import React, { useState, KeyboardEvent, ChangeEvent } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import type { FileItem } from "../../types";
+import "./EditorPanel.css";
 
 interface EditorPanelProps {
   selectedFile: FileItem | null;

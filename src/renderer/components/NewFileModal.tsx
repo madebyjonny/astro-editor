@@ -7,6 +7,7 @@ import React, {
 } from "react";
 import slugify from "slugify";
 import type { Schema, Frontmatter, FieldSchema } from "../../types";
+import "./NewFileModal.css";
 
 interface NewFileModalProps {
   schema: Schema;

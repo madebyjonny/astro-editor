@@ -1,5 +1,6 @@
 import React, { useState, KeyboardEvent, ChangeEvent } from "react";
 import type { FileItem, Schema, Frontmatter, FieldSchema } from "../../types";
+import "./MetadataPanel.css";
 
 interface MetadataPanelProps {
   selectedFile: FileItem | null;
